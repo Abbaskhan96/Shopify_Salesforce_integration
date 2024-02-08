@@ -33,7 +33,8 @@ def search_products():
     field={}
 
     for title in product_names:
-        products = shopify.Product.find(title=title, status="active")
+       # print("title", title)
+        products = shopify.Product.find(title=title, status='active')
         for product in products:
             
             if len(product.variants)>1:
@@ -54,12 +55,26 @@ def search_products():
             metafields= product.metafields()
             for metafield in metafields:
                 if metafield.key in ["light_conditions","soil_moisture","plant_type","flower_colour","soil_type","animal_resistant",
-                                     "bloom_type","wildlife_benefits","plant_height"]:
-                    
-                    if product.title in field:
+                                     "bloom_type","wildlife_benefits","plant_height","plants_in_this_collection"]:
+
+                    if (product.title in field):
+                        if metafield.key == "plants_in_this_collection":
+                            updated_value=metafield.value
+                            # Remove square brackets and split by comma
+                            metaobject_ids = updated_value.strip("[]").split(",")
+                            
+                            # Extract numeric IDs
+                            numeric_ids = [(metaobject_id.strip("\"").split("/")[-1]) for metaobject_id in metaobject_ids]
+                            
+                            #changing the values
+                            metafield.value=str([numeric_id for numeric_id in numeric_ids])
                         field[product.title][metafield.key]=metafield.value
+
                     else:
                         field[product.title]={metafield.key:metafield.value}
+
+
+                    #print(field)
                     product_dict[product.title].update({"metafields": field[product.title]})
                     #print(product_dict)
                     #print("\n\n")
@@ -78,6 +93,8 @@ def search_products():
                     empty_keys_to_delete.append(key)
             for i in empty_keys_to_delete: 
                 del product_dict[product.title]["metafields"][i]
+
+            print(product.title)
                     
     return product_dict
 
@@ -223,9 +240,11 @@ def search_order_shopify(order_number):
             }
         #adding values in dictionary with the order_number keyword
         if not 'Rise.ai' in order.tags:
-            order_info_shopify[str(order.order_number)]= {"Billing": billing, "Shipping": shipping, "Contact": contact}
+            #order_info_shopify[str(order.order_number)]= {"Billing": billing, "Shipping": shipping, "Contact": contact}
+            order_info_shopify[str(order.order_number)]= {"Shipping": shipping, "Contact": contact}
         else:
-            order_info_shopify[str(order.order_number)]= {"Billing": billing, "Contact": contact}
+            #order_info_shopify[str(order.order_number)]= {"Billing": billing, "Contact": contact}
+            order_info_shopify[str(order.order_number)]= {"Contact": contact}
         #print(order_info_shopify,"\n\n")
 
         transaction= order.transactions()

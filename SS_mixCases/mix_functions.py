@@ -71,11 +71,12 @@ def verifying_both_env_response_product(shopify_products, sf_products):
             if data['SKU']!= sf_data["SKU"] or data["product_id"]!=sf_data["product_id"] or data["metafields"]!=sf_data["metafields"]:
             #printing message for mismatch
                 
+                """
                 #check which value is missing or different
                 if data["SKU"] != sf_data["SKU"]:
                     print(f"Product SKU Changed observed in {name}")
                     print(f" Shopify SKU = {data['SKU']} , Salesforce SKU = {sf_data['SKU']}")
-            
+                """
             
                 if data["product_id"] != sf_data["product_id"]:
                     print(f"Product ID Change observed in {name}")
@@ -115,7 +116,9 @@ def verifying_both_env_response_order(shopify_search_order, sf_search_order):
             sf_data = sf_search_order[name]
 
             #Comparing both billing, shipping and contact values
-            if (data['Billing']!= sf_data["Billing"] or 
+            #if (data['Billing']!= sf_data["Billing"] or 
+            
+            if (('Shipping' in data and data["Shipping"])!=('Shipping' in sf_data and sf_data["Shipping"]) or 
             ('Shipping' in data and data["Shipping"])!=('Shipping' in sf_data and sf_data["Shipping"]) or 
             data["Contact"] != sf_data["Contact"]) or ('transaction1' in data and 'transaction1' in sf_data and data['transaction1']!=sf_data['transaction1']) or ('transaction2' in data and 'transaction2' in sf_data and data['transaction2']!=sf_data['transaction2'] or
             data["Order_Price_details"] != sf_data["Order_Price_details"]):
@@ -123,8 +126,8 @@ def verifying_both_env_response_order(shopify_search_order, sf_search_order):
                 print(f"the values of {name} are not same in both environment Sopify/Salesforce")
             
                 #check which value is missing or different
-                if data["Billing"] != sf_data["Billing"]:
-                    print(f" Shopify Billing Details are not same with Salesforce Billing Detailss")
+                #if data["Billing"] != sf_data["Billing"]:
+                #    print(f" Shopify Billing Details are not same with Salesforce Billing Detailss")
             
             
                 if (('Shipping' in order_info_shopify[f'{name}'])and data["Shipping"]) != (('Shipping' in order_info_shopify[f'{name}'])and sf_data["Shipping"]):

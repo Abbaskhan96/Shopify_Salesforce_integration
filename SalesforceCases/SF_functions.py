@@ -11,7 +11,7 @@ def convert_to_list(string):
 
     try:
         items=[item.strip() for item in string.split(";")] 
-    
+
         return str(items).strip()
     
     except:
@@ -38,20 +38,26 @@ def search_products_sf(sf):
         global multi_variants_SKU, sf_multivariants_SKU, variants_more_than_1
         #print("sf_multivariants_SKU",sf_multivariants_SKU)
         
+        query_plant_collection= f"SELECT Species_Product__r.Species_Shopify_MetaObject_Id__c FROM Product_Bundling__c WHERE Collection_Product__r.Name= '{name}'"
+                
         if name not in variants_more_than_1:
             #print(f'the plant {name} has no variants')
             
             #metafields_names="Light_conditions__c, Soil_Moisture__c, Plant_Type__c, Flower_Color__c, Soil_Type__c, Animal_Resistant__c, Bloom_Type__c, Wildlife_Benefits__c, Plant_Height__c"
-            query = f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE isActive = true AND Name = '{name}'"
-            product_dict= sf_all_data(sf,query, product_dict, name, False)
+            query = f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE  Name = '{name}' AND Is_Parent_Product__c=true "
+            #query = f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE Name = '{name}'"
+            product_dict= sf_all_data(sf,query,query_plant_collection, product_dict, name, False)
             
 
         else:
             #creating list for storing all sf variants response
             sum_of_variants=[]
             for i, sku in enumerate(multi_variants_SKU[name]):
-                query_var= f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE isActive = true AND StockKeepingUnit = '{sku}'"
-                product_dict_multivariant=sf_all_data(sf,query_var, product_dict, name, True, sum_of_variants, len(multi_variants_SKU[name]))            
+                #query_var= f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE isActive=true StockKeepingUnit = '{sku}'"
+                query_var= f"SELECT StockKeepingUnit, Shopify_Id__c, {metafields_names} FROM Product2 WHERE Name = '{name}' AND Is_Parent_Product__c=true"
+                #print(query_var)
+                #query_var=f"SELECT Collection_Product__r.Name, Collection_Product__r.{metafields_names}, Species_Product__r.Plant_Profile__r.Name, Species_Product__r.Plants_in_this_collection__c FROM Product_Bundling__c Where Collection_Product__r.Name='Buttonbush Shrub'"
+                product_dict_multivariant=sf_all_data(sf,query_var, query_plant_collection, product_dict, name, True, sum_of_variants, len(multi_variants_SKU[name]))            
             product_dict=product_dict_multivariant
                 
     return product_dict
@@ -106,19 +112,30 @@ def common_variants_values(var_response, name):
         output_list_of_json.append(json_response)
 
     new_dict = {}
-    subkey=["light_conditions", "soil_moisture", "plant_type", "flower_colour", "soil_type", "animal_resistant", "bloom_type", "wildlife_benefits", "plant_height"]
+    subkey=["light_conditions", "soil_moisture", "plant_type", "flower_colour", "soil_type", "animal_resistant", "bloom_type", "wildlife_benefits", "plant_height","plants_in_this_collection"]
     #for subkey in subkey:
     product_dict=find_common_subvalues(output_list_of_json, subkey, name)
+    #print(name)
     
     return product_dict
     #print(bloom_type)
     
 
-def sf_all_data(sf,query, product_dict, name, Bool:bool, sum_of_variants=None,  sku_list=None):
+def sf_all_data(sf,query,plant_collection,product_dict, name, Bool:bool, sum_of_variants=None,  sku_list=None):
     #response = sf.query_all(query)
     response = sf.query_all(query)
     records = response['records']
-    #print(records)
+    
+    plant_collection_response= sf.query_all(plant_collection)
+    plant_collection_records= plant_collection_response['records']    
+    #print(plant_collection_records[0])
+
+    #for record in plant_collection_records:
+    #    print(record['Species_Product__r']['Species_Shopify_MetaObject_Id__c'])
+
+    plant_collection_records=[record['Species_Product__r']['Species_Shopify_MetaObject_Id__c'] for record in plant_collection_records]
+    
+    #print(plant_collection_records)
     if records:
         #print(records)
         sku = records[0]['StockKeepingUnit']
@@ -134,7 +151,9 @@ def sf_all_data(sf,query, product_dict, name, Bool:bool, sum_of_variants=None,  
             "wildlife_benefits":convert_to_list((records[0]['Wildlife_Benefits__c'])),
             "plant_height":convert_to_list((records[0]['Plant_Height__c']))
             }
+        metafield["plants_in_this_collection"]=str(plant_collection_records)
 
+        #print("metafield in sf..", metafield["plants_in_this_collection"])
         product_dict[name] = {"SKU": sku, "product_id": product_id, "metafields": metafield}
 
         empty_keys_to_delete=[]
@@ -234,10 +253,12 @@ def search_order_sforce(sf, customer_order_number):
         }
     # Return the dictionary with the order information
     if 'Shipping' in (order_info_shopify[f'{customer_order_number}']):
-        order_info[str(customer_order_number)] = {"Billing": billing, "Shipping": shipping, "Contact": contact}
+        #order_info[str(customer_order_number)] = {"Billing": billing, "Shipping": shipping, "Contact": contact}
+        order_info[str(customer_order_number)] = {"Shipping": shipping, "Contact": contact}
     #print(order_info)
     else:
-        order_info[str(customer_order_number)] = {"Billing": billing, "Contact": contact}
+        #order_info[str(customer_order_number)] = {"Billing": billing, "Contact": contact}
+        order_info[str(customer_order_number)] = {"Contact": contact}
 
     #fetching Transaction Reords from Order Query
     tr_record= record["Transactions__r"]

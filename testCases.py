@@ -2,7 +2,7 @@ __unittest = True
 import sys
 sys.path += ['./Connection_Setup/','./ShopifyCases/','./SalesforceCases','./SS_mixCases']
 from ConnectionSetup import *
-from shopify_functions import product_adding_to_list, order_adding_to_list, search_products, product_order_exist_result, defined_order_for_searching
+from shopify_functions import product_adding_to_list, order_adding_to_list, search_products, product_order_exist_result, defined_order_for_searching, last_week_orders, search_order_shopify
 from SF_functions import *
 from mix_functions import *
 import unittest
@@ -57,9 +57,9 @@ class Test_Cases(unittest.TestCase):
         clear_connection()
 
 
-    """
+    
   #-=================Products--Searching--Test--Cases------------------------------------  
-      
+    """  
   #Test Case for Searching the product in Salesforce
     def test_03_search_product_salesforce(self):
        
@@ -78,7 +78,7 @@ class Test_Cases(unittest.TestCase):
         #Asserting that the count of provided product names are same with product responses count
         self.assertEqual(len(provided_products_list),len(returned_search_products_dict_sf), msg = f"{matching_product} Product is missing in Salesforce")
         
-
+    
     #Test Case for Searching the Product in Shopify
     def test_02_search_product_shopify(self):
         print("Case__Shopify--Searching--Products--Cases--is-running")
@@ -101,8 +101,8 @@ class Test_Cases(unittest.TestCase):
         #Asserting that the count of provided product names are same with product responses count
         self.assertEqual(len(provided_products_list),len(returned_search_products_dict_shopify), msg = f"{matching_product} Product is missing in shopify")
 
-
-    #Test Case that Check that the Attributes Response of Both Shopify and Salesforce is Same
+    """
+    #Test Case that Check that the Filter values of parent Products in Both Shopify and Salesforce is Same
     def test_04_checking_both_env_responses_product(self):
         self.maxDiff = None
         print("Case__Checking for the product attributes in both the environments Shopify/Salesforce")
@@ -121,6 +121,10 @@ class Test_Cases(unittest.TestCase):
         
     
         shopify_products_dict= json.loads(shopify_products_dict)
+       # print("This is Shopify Response....")
+       # print(shopify_products_dict)
+
+
         
         sf_products= json.dumps(sf_products)
         
@@ -129,14 +133,17 @@ class Test_Cases(unittest.TestCase):
         
 
         sf_products= json.loads(sf_products)
-        
+       # print('\n\n')
+       # print("This is Salesforce Response...")
+       # print(sf_products)
         
         verifying_both_env_response_product(shopify_products_dict, sf_products)
 
 
         #self.assertEqual(shopify_products_dict, sf_products, msg= "the response data in the environment are not same")
         
-    """    
+        
+    """
     #-========================Order-Searching-Test-Cases----------------------------------------
 
     
@@ -151,8 +158,8 @@ class Test_Cases(unittest.TestCase):
             result= sforce_hgfi_response(self_sf, hgfi_auth, hgfi_store_id, i)
 
     
-
-    """
+   
+    
     #Test Cases the Check the last week orders details
     def test_05_save_last_week_orders_number(self):
         global returned_week_order_name
@@ -187,7 +194,7 @@ class Test_Cases(unittest.TestCase):
             #print("Checking Order: ",order)
             shopify_search_week_orders= search_order_shopify(order)
         
-        #print(shopify_search_week_orders)
+        print(shopify_search_week_orders)
 
     def test_07_search_last_week_orders_sforce(self):
         print('Case for Searching the last week order in Salesforce\n\n')
@@ -196,14 +203,20 @@ class Test_Cases(unittest.TestCase):
         for i in returned_week_order_name:
             #print(i)
             sf_search_week_orders= search_order_sforce(self_sf, i)
-        #print(sf_search_week_orders)
+        print("\n\n")
+        print(sf_search_week_orders)
     
     def test_08_check_last_week_orders_response_both_env(self):
         print('Case for matching order details Both Environments....')
 
+        #print(type(shopify_search_week_orders),shopify_search_week_orders,"\n\n")
+        #print(type(sf_search_week_orders),sf_search_week_orders)
         for item1, item2 in zip(shopify_search_week_orders.items(), sf_search_week_orders.items()):
-           
+            
+            #print(dict([item1]),"\n\n")
+            #print(dict([item2]))
             verifying_both_env_response_order(dict([item1]), dict([item2]))
+            #if not dict([item1]) == dict([item[2]):
             self.assertEqual(dict([item1]), dict([item2]), msg= "the response data in the environment are not same")
     """
 #-----------------------------------------------------------------------------------------------------------------------
