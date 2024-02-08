@@ -115,7 +115,7 @@ def common_variants_values(var_response, name):
     subkey=["light_conditions", "soil_moisture", "plant_type", "flower_colour", "soil_type", "animal_resistant", "bloom_type", "wildlife_benefits", "plant_height","plants_in_this_collection"]
     #for subkey in subkey:
     product_dict=find_common_subvalues(output_list_of_json, subkey, name)
-    #print(name)
+    print(name)
     
     return product_dict
     #print(bloom_type)

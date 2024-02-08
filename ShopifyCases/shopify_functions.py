@@ -23,6 +23,24 @@ def order_adding_to_list():
     return lines
 
 
+
+
+#plants_in_this_collection metfield
+
+def plant_collection(metafield_key, metafield_value):
+
+    updated_value=metafield_value
+    # Remove square brackets and split by comma
+    metaobject_ids = updated_value.strip("[]").split(",")
+    
+    # Extract numeric IDs
+    numeric_ids = [(metaobject_id.strip("\"").split("/")[-1]) for metaobject_id in metaobject_ids]
+    
+    #changing the values
+    metafield_value=str([numeric_id for numeric_id in numeric_ids])
+    return metafield_key, metafield_value
+
+
 #Searching Products in Shopify..,.
 
 def search_products():
@@ -59,18 +77,13 @@ def search_products():
 
                     if (product.title in field):
                         if metafield.key == "plants_in_this_collection":
-                            updated_value=metafield.value
-                            # Remove square brackets and split by comma
-                            metaobject_ids = updated_value.strip("[]").split(",")
-                            
-                            # Extract numeric IDs
-                            numeric_ids = [(metaobject_id.strip("\"").split("/")[-1]) for metaobject_id in metaobject_ids]
-                            
-                            #changing the values
-                            metafield.value=str([numeric_id for numeric_id in numeric_ids])
+                            metafield.key, metafield.value= plant_collection(metafield.key, metafield.value)
                         field[product.title][metafield.key]=metafield.value
 
                     else:
+                        #print(metafield.key)
+                        if metafield.key== "plants_in_this_collection":
+                            metafield.key, metafield.value= plant_collection(metafield.key, metafield.value)
                         field[product.title]={metafield.key:metafield.value}
 
 
@@ -80,14 +93,7 @@ def search_products():
                     #print("\n\n")
 
             empty_keys_to_delete=[]
-            #print("test test test...")
-            #all_check_empty=[x for x in product_dict[product.title]['metafields'].values()]
-            #if all(not sublist for sublist in all_check_empty):
-            #    print("All elements are empty lists")
-            #    return product_dict
-            #else:
-           # print(product_dict)
-           # print("\n")
+            
             for key, value in product_dict[product.title]["metafields"].items():
                 if value=='[]':
                     empty_keys_to_delete.append(key)

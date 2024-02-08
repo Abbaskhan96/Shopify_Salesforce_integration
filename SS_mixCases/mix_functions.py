@@ -55,17 +55,25 @@ def updating_the_metafield_values(shopify_products, sf_products):
 #Checking Products Response of Shopify and Salesforce
 def verifying_both_env_response_product(shopify_products, sf_products):
 
-    
+
+    print("\n")
+    print("==================================")
+    print("\n")
+    print("The Below Products are the passed products =========== >")    
+    print("\n")
     #executing function for removing and creating the  sets
     updating_the_metafield_values(shopify_products, sf_products)
 
+
     for name,data in shopify_products.items():
         
-
+        print(name)
         if name in sf_products:
 
             
             sf_data = sf_products[name]
+
+
 
             #Comparing both SKU and ID values
             if data['SKU']!= sf_data["SKU"] or data["product_id"]!=sf_data["product_id"] or data["metafields"]!=sf_data["metafields"]:
@@ -86,6 +94,7 @@ def verifying_both_env_response_product(shopify_products, sf_products):
                 if data["metafields"] != sf_data["metafields"]:
                     print("\n")
                     print(f"{name} Metafield change")
+                    print("\n")
                     #print("Shopify...")
                     #print(data["metafields"])
                     #print("\n\n\n")

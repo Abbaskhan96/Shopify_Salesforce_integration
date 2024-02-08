@@ -107,9 +107,16 @@ class Test_Cases(unittest.TestCase):
         self.maxDiff = None
         print("Case__Checking for the product attributes in both the environments Shopify/Salesforce")
         
+        print("\n")
+        print("Shopify Products ------> ")
+        print("\n")
         shopify_products_dict = search_products()
                                                         
-       
+        print("\n")
+        print("==========================================")
+        print("\n")
+        print("Salesforce Products -------> ")
+        print("\n")
         sf_products= search_products_sf(self_sf)
 
         #----Sorting dictionaries fot same key results
@@ -121,8 +128,8 @@ class Test_Cases(unittest.TestCase):
         
     
         shopify_products_dict= json.loads(shopify_products_dict)
-       # print("This is Shopify Response....")
-       # print(shopify_products_dict)
+        #print("This is Shopify Response....")
+        #print(shopify_products_dict)
 
 
         
@@ -133,9 +140,9 @@ class Test_Cases(unittest.TestCase):
         
 
         sf_products= json.loads(sf_products)
-       # print('\n\n')
-       # print("This is Salesforce Response...")
-       # print(sf_products)
+        #print('\n\n')
+        #print("This is Salesforce Response...")
+        #print(sf_products)
         
         verifying_both_env_response_product(shopify_products_dict, sf_products)
 
